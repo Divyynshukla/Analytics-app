@@ -5,21 +5,22 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export default function LoginPage() {
-    const router = useRouter();
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
 
-  const handleLogin = async (e : any) => {
-  e.preventDefault();
+  const handleLogin = async (e: any) => {
+    e.preventDefault();
 
-  try {
-    const res = await loginUser({ email, password });
-    console.log(res.data);
-  } catch (err) {
-    console.error(err);
-  }
-};
+    try {
+      const res = await loginUser({ email, password });
+      console.log(res.data);
+      router.push("/dashboard");
+    } catch (err) {
+      console.error(err);
+    }
+  };
   return (
     <div className="relative min-h-screen flex items-center justify-center overflow-hidden
                     bg-gradient-to-br from-[#eef3ff] via-[#f7f9ff] to-white">
@@ -61,7 +62,7 @@ export default function LoginPage() {
           </p>
         </div>
 
-        <form className="space-y-5" onSubmit={handleLogin}>    
+        <form className="space-y-5" onSubmit={handleLogin}>
           <input
             className="w-full px-4 py-3 rounded-xl border border-slate-200
                        placeholder:text-gray-700 placeholder:opacity-100
