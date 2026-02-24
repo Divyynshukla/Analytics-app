@@ -1,0 +1,125 @@
+"use client";
+
+import { registerUser } from "@/services/auth.service";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+
+export default function SignupPage() {
+    const [name, setName] = useState("");
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
+    const router = useRouter();
+
+    const handleSubmit = (e: any) => {
+        e.preventDefault();
+        try {
+            registerUser({ name, email, password, confirmPassword });
+            router.push("/login");
+        } catch (error) {
+            console.log(error);
+        }
+    };
+    return (
+        <div className="relative min-h-screen flex items-center justify-center overflow-hidden
+                    bg-gradient-to-br from-[#eef3ff] via-[#f7f9ff] to-white">
+
+            {/* Gradient Blobs */}
+            <div className="absolute -top-48 -left-48 w-[600px] h-[600px]
+                      bg-gradient-to-br from-blue-400 to-indigo-400
+                      rounded-full blur-[120px] opacity-25" />
+
+            <div className="absolute -bottom-48 -right-48 w-[600px] h-[600px]
+                      bg-gradient-to-br from-indigo-300 to-sky-300
+                      rounded-full blur-[120px] opacity-25" />
+
+            {/* Bottom Wave */}
+            <svg
+                className="absolute bottom-0 left-0 w-full"
+                viewBox="0 0 1440 320"
+                preserveAspectRatio="none"
+            >
+                <path
+                    fill="#dbe7ff"
+                    fillOpacity="0.6"
+                    d="M0,256L80,234.7C160,213,320,171,480,176C640,181,800,235,960,240C1120,245,1280,203,1360,181.3L1440,160L1440,320L1360,320C1280,320,1120,320,960,320C800,320,640,320,480,320C320,320,160,320,80,320L0,320Z"
+                />
+            </svg>
+
+            {/* Signup Card */}
+            <div className="relative z-10 w-[440px]
+                      bg-white/90 backdrop-blur-xl
+                      rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.12)]
+                      px-8 py-10">
+
+                <div className="mb-8 text-center">
+                    <h1 className="text-3xl font-semibold text-slate-800">
+                        Create Account
+                    </h1>
+                    <p className="text-sm text-slate-500 mt-1">
+                        Get started with your dashboard
+                    </p>
+                </div>
+
+                <form className="space-y-4" onSubmit={handleSubmit}>
+                    <input
+                        className="w-full px-4 py-3 rounded-xl border border-slate-200
+            placeholder:text-gray-700 placeholder:opacity-100
+                       focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        type="text"
+                        placeholder="Full Name"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                    />
+
+                    <input
+                        className="w-full px-4 py-3 rounded-xl border border-slate-200
+            placeholder:text-gray-700 placeholder:opacity-100
+                       focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        type="email"
+                        placeholder="Email address"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                    />
+
+                    <input
+                        className="w-full px-4 py-3 rounded-xl border border-slate-200
+            placeholder:text-gray-700 placeholder:opacity-100
+                       focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        type="password"
+                        placeholder="Password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                    />
+
+                    <input
+                        className="w-full px-4 py-3 rounded-xl border border-slate-200
+            placeholder:text-gray-700 placeholder:opacity-100
+                       focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        type="password"
+                        placeholder="Confirm Password"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                    />
+
+                    <button
+                        type="submit"
+                        className="w-full mt-2 py-3 rounded-xl
+                       bg-gradient-to-r from-blue-600 to-indigo-600
+                       text-white font-medium
+                       hover:from-blue-700 hover:to-indigo-700
+                       shadow-lg transition">
+                        Sign Up
+                    </button>
+                </form>
+
+                <div className="mt-6 text-center text-sm text-slate-500">
+                    Already have an account?{" "}
+                    <span className="text-blue-600 cursor-pointer hover:underline" onClick={() => router.push("/login")}>
+                        Login
+                    </span>
+                </div>
+            </div>
+        </div>
+    );
+}

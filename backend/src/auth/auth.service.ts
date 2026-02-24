@@ -6,6 +6,7 @@ import { Repository } from 'typeorm';
 import { UpdateUserDto } from '../user/dto/update-user.dto';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
+import { SigninDto } from 'src/user/dto/signin.dto';
 
 @Injectable()
 export class AuthService {
@@ -15,18 +16,21 @@ async create(createUserDto: CreateUserDto) {
   const password = await bcrypt.hash(createUserDto.password, 10);
 
   const user = this.userRepository.create({
-    ...createUserDto,
+    name: createUserDto.name,
+    email: createUserDto.email,
     password,
   });
 
-  return this.userRepository.save(user);
+  await this.userRepository.save(user)
+
+  return {message: "register successfully"} ;
 }
-  async login(createUserDto: CreateUserDto) {
-    const user = await this.userRepository.findOneBy({ email: createUserDto.email });
+  async login(LoginDto: SigninDto) {
+    const user = await this.userRepository.findOneBy({ email: LoginDto.email });
     if (!user) {
       throw new Error('User not found');
     }
-    const password = await bcrypt.compare(createUserDto.password, user.password);
+    const password = await bcrypt.compare(LoginDto.password, user.password);
     if (!password) {
       throw new Error('Invalid password');
     }
