@@ -15,6 +15,10 @@ export default function LoginPage() {
 
     try {
       const res = await loginUser({ email, password });
+      if (res.data.accessToken) {
+        localStorage.setItem("token", res.data.accessToken);
+        localStorage.setItem("userEmail", email);
+      }
       console.log(res.data);
       router.push("/dashboard");
     } catch (err) {
@@ -65,7 +69,7 @@ export default function LoginPage() {
         <form className="space-y-5" onSubmit={handleLogin}>
           <input
             className="w-full px-4 py-3 rounded-xl border border-slate-200
-                       placeholder:text-gray-700 placeholder:opacity-100
+                       text-slate-900 placeholder:text-slate-400
                        focus:outline-none focus:ring-2 focus:ring-blue-500
                        focus:border-transparent transition"
             type="email"
@@ -76,8 +80,9 @@ export default function LoginPage() {
 
           <input
             className="w-full px-4 py-3 rounded-xl border border-slate-200
+                       text-slate-900 placeholder:text-slate-400
                        focus:outline-none focus:ring-2 focus:ring-blue-500
-                       focus:border-transparent transition placeholder:text-black"
+                       focus:border-transparent transition"
             type="password"
             placeholder="Password"
             value={password}

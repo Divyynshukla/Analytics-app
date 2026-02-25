@@ -1,18 +1,110 @@
+"use client";
+
 import DashboardLayout from "@/components/DashboardLayout";
+import LineChart from "@/components/LineChart";
+import { useState, useRef, useEffect, useMemo } from "react";
 
 export default function DashboardPage() {
+    const [selectedRange, setSelectedRange] = useState("Last 30 Days");
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const [isHeaderMenuOpen, setIsHeaderMenuOpen] = useState(false);
+    const [isRefreshing, setIsRefreshing] = useState(false);
+    const dropdownRef = useRef<HTMLDivElement>(null);
+    const headerMenuRef = useRef<HTMLDivElement>(null);
+
+    const timeOptions = ["Today", "Yesterday", "Last 7 Days", "Last 30 Days", "Last 90 Days", "All Time"];
+
+    // Close dropdown when clicking outside
+    useEffect(() => {
+        function handleClickOutside(event: MouseEvent) {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+                setIsDropdownOpen(false);
+            }
+            if (headerMenuRef.current && !headerMenuRef.current.contains(event.target as Node)) {
+                setIsHeaderMenuOpen(false);
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
+
+    const handleRefresh = () => {
+        setIsRefreshing(true);
+        setIsHeaderMenuOpen(false);
+        // Simulate data fetch
+        setTimeout(() => setIsRefreshing(false), 1500);
+    };
+
+    const chartData = useMemo(() => {
+        // Different data based on selectedRange
+        const points = selectedRange === "Today" ? 12 : 30;
+        return Array.from({ length: points }, (_, i) => ({
+            name: selectedRange === "Today" ? `${i}h` : `Mar ${i + 1}`,
+            value: Math.floor(Math.random() * 500) + 100,
+        }));
+    }, [selectedRange]);
+
     return (
         <DashboardLayout>
             {/* Header section */}
             <div className="flex items-center justify-between mb-10">
-                <h1 className="text-2xl font-bold text-slate-800">
-                    Dashboard
-                </h1>
-                <button className="p-2 text-slate-400 hover:text-slate-600 transition-colors">
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7"></path>
-                    </svg>
-                </button>
+                <div className="flex items-center gap-3">
+                    <h1 className="text-2xl font-bold text-slate-800">
+                        Dashboard
+                    </h1>
+                    {isRefreshing && (
+                        <div className="flex items-center gap-2 px-2 py-1 bg-blue-50 text-blue-600 rounded-lg animate-pulse">
+                            <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce"></div>
+                            <span className="text-[10px] font-bold uppercase tracking-wider">Refreshing...</span>
+                        </div>
+                    )}
+                </div>
+
+                <div className="relative" ref={headerMenuRef}>
+                    <button
+                        onClick={() => setIsHeaderMenuOpen(!isHeaderMenuOpen)}
+                        className={`p-2 rounded-xl transition-all ${isHeaderMenuOpen ? "bg-slate-100 text-slate-900 shadow-inner" : "text-slate-400 hover:text-slate-600 hover:bg-slate-50"}`}
+                    >
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+                        </svg>
+                    </button>
+
+                    {isHeaderMenuOpen && (
+                        <div className="absolute right-0 mt-3 w-56 bg-white border border-slate-100 rounded-2xl shadow-2xl z-[100] py-3 animate-in fade-in slide-in-from-top-4 duration-300">
+                            <div className="px-4 py-2 mb-2 border-b border-slate-50">
+                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Dashboard Actions</p>
+                            </div>
+
+                            <button
+                                onClick={handleRefresh}
+                                className="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:text-blue-600 transition-colors group"
+                            >
+                                <svg className="w-4 h-4 text-slate-400 group-hover:text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                                </svg>
+                                Refresh Data
+                            </button>
+
+                            <button className="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:text-blue-600 transition-colors group">
+                                <svg className="w-4 h-4 text-slate-400 group-hover:text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                                Export Report (CSV)
+                            </button>
+
+                            <div className="mx-3 mt-2 pt-2 border-t border-slate-50">
+                                <button className="w-full flex items-center gap-3 px-3 py-2 text-xs font-bold text-slate-400 hover:text-slate-600 transition-colors">
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37a1.724 1.724 0 002.572-1.065z"></path>
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    </svg>
+                                    Settings
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                </div>
             </div>
 
             {/* Project Overview */}
@@ -21,25 +113,25 @@ export default function DashboardPage() {
                     Project Overview
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="card p-6 bg-white border-l-4 border-l-blue-500">
+                    <div className="card p-6 bg-white border-l-4 border-l-blue-500 text-slate-900 border-2 border-slate-200 rounded-2xl">
                         <p className="text-slate-500 text-sm font-medium mb-2">Total Events</p>
                         <p className="text-3xl font-bold text-slate-900">12.430</p>
                         <div className="w-full h-1.5 bg-slate-100 rounded-full mt-4">
                             <div className="w-[70%] h-full bg-blue-500 rounded-full"></div>
                         </div>
                     </div>
-                    <div className="card p-6 bg-white border-l-4 border-l-green-400">
+                    <div className="card p-6 bg-white border-l-4 border-l-green-400 rounded-2xl border-2 border-slate-200">
                         <p className="text-slate-500 text-sm font-medium mb-2">Event: Today</p>
                         <p className="text-3xl font-bold text-slate-900">56</p>
                         <div className="w-full h-1.5 bg-slate-100 rounded-full mt-4">
                             <div className="w-[45%] h-full bg-green-400 rounded-full"></div>
                         </div>
                     </div>
-                    <div className="card p-6 bg-white overflow-hidden relative">
+                    <div className="card p-6 bg-white overflow-hidden relative rounded-2xl border-2 border-slate-200">
                         <p className="text-slate-500 text-sm font-medium mb-2">Event This Week</p>
                         <p className="text-3xl font-bold text-slate-900">320</p>
                         {/* Small Sparkline simulation */}
-                        <div className="absolute bottom-0 left-0 right-0 h-10 opaity-50">
+                        <div className="absolute bottom-0 left-0 right-0 h-10 opacity-50">
                             <svg className="w-full h-full" viewBox="0 0 100 20" preserveAspectRatio="none">
                                 <path d="M0 20 L20 15 L40 18 L60 10 L80 12 L100 5 L100 20 Z" fill="rgba(59, 130, 246, 0.1)"></path>
                                 <path d="M0 20 L20 15 L40 18 L60 10 L80 12 L100 5" fill="none" stroke="#3b82f6" strokeWidth="1"></path>
@@ -55,58 +147,41 @@ export default function DashboardPage() {
                     <h2 className="text-lg font-bold text-slate-800">
                         Events Over Time
                     </h2>
-                    <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-lg px-3 py-1.5 cursor-pointer hover:bg-slate-50 transition-colors">
-                        <span className="text-xs font-semibold text-slate-700">Last 30 Days</span>
-                        <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
-                        </svg>
+                    <div className="relative" ref={dropdownRef}>
+                        <div
+                            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                            className="flex items-center gap-2 bg-white border border-slate-200 rounded-lg px-3 py-1.5 cursor-pointer hover:bg-slate-50 transition-colors shadow-sm"
+                        >
+                            <span className="text-xs font-semibold text-slate-700">{selectedRange}</span>
+                            <svg className={`w-4 h-4 text-slate-400 transition-transform ${isDropdownOpen ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </div>
+
+                        {/* Dropdown Menu */}
+                        {isDropdownOpen && (
+                            <div className="absolute right-0 mt-2 w-48 bg-white border border-slate-100 rounded-xl shadow-xl z-50 py-2 animate-in fade-in slide-in-from-top-2 duration-200">
+                                {timeOptions.map((option) => (
+                                    <div
+                                        key={option}
+                                        onClick={() => {
+                                            setSelectedRange(option);
+                                            setIsDropdownOpen(false);
+                                        }}
+                                        className={`px-4 py-2.5 text-xs font-medium cursor-pointer transition-colors ${selectedRange === option
+                                            ? "bg-blue-50 text-blue-600"
+                                            : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                                            }`}
+                                    >
+                                        {option}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
                 </div>
-                <div className="card p-10 bg-white h-[300px] flex items-center justify-center relative overflow-hidden">
-                    {/* Mock Chart using SVG */}
-                    <svg className="w-full h-full" viewBox="0 0 1000 300" preserveAspectRatio="none">
-                        {/* Grid Lines */}
-                        <line x1="0" y1="50" x2="1000" y2="50" stroke="#f1f5f9" strokeWidth="1" />
-                        <line x1="0" y1="120" x2="1000" y2="120" stroke="#f1f5f9" strokeWidth="1" />
-                        <line x1="0" y1="190" x2="1000" y2="190" stroke="#f1f5f9" strokeWidth="1" />
-                        <line x1="0" y1="260" x2="1000" y2="260" stroke="#f1f5f9" strokeWidth="1" />
-
-                        {/* Path Area */}
-                        <path
-                            d="M0 260 L100 220 L200 180 L300 195 L400 140 L500 160 L600 120 L700 85 L800 110 L900 60 L1000 40 V300 H0 Z"
-                            fill="url(#chartGradient)"
-                        />
-                        {/* Path Line */}
-                        <path
-                            d="M0 260 L100 220 L200 180 L300 195 L400 140 L500 160 L600 120 L700 85 L800 110 L900 60 L1000 40"
-                            fill="none"
-                            stroke="#3b82f6"
-                            strokeWidth="4"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                        />
-                        {/* Points */}
-                        <circle cx="400" cy="140" r="6" fill="white" stroke="#3b82f6" strokeWidth="3" />
-                        <circle cx="700" cy="85" r="6" fill="white" stroke="#3b82f6" strokeWidth="3" />
-                        <circle cx="1000" cy="40" r="6" fill="white" stroke="#3b82f6" strokeWidth="3" />
-
-                        <defs>
-                            <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.4" />
-                                <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.0" />
-                            </linearGradient>
-                        </defs>
-                    </svg>
-                    {/* Chart Labels */}
-                    <div className="absolute bottom-4 left-10 right-10 flex justify-between text-[10px] font-bold text-slate-400">
-                        <span>10 AM</span>
-                        <span>50 PM</span>
-                        <span>30 AM</span>
-                        <span>15 Mar</span>
-                        <span>17 Feb</span>
-                        <span>10 AM</span>
-                        <span>12 PM</span>
-                    </div>
+                <div className="card p-6 bg-white h-[350px] flex items-center justify-center relative overflow-hidden">
+                    <LineChart data={chartData} />
                 </div>
             </section>
 
